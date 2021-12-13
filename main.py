@@ -6,7 +6,7 @@ from direct.actor.Actor import Actor
 import sys
 import character
 
-#The Main app class
+#The Main app class``
 class MyApp(ShowBase):
 
     def __init__(self):
@@ -34,6 +34,7 @@ class MyApp(ShowBase):
         #Adds the spinCameraTask procedure to the task manager
 
         self.taskMgr.add(self.movecamera, "update")
+        self.taskMgr.add(self.character.spinactor, "Spinny")
         
     #Spins camera that now does nothing
     def spinCameraTask(self, task):
@@ -56,6 +57,7 @@ class MyApp(ShowBase):
         #Camera offset
         offsetX = -30
         offsetY = 10
+        #Sets camera Position
         self.camera.setPos(self.character.position[0],self.character.position[1] + offsetX,self.character.position[2] + offsetY)
         
         return task.cont
