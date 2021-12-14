@@ -34,7 +34,6 @@ class MyApp(ShowBase):
         #Adds the spinCameraTask procedure to the task manager
 
         self.taskMgr.add(self.movecamera, "update")
-        self.taskMgr.add(self.character.spinactor, "Spinny")
         
     #Spins camera that now does nothing
     def spinCameraTask(self, task):
