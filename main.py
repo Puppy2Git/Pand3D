@@ -5,17 +5,24 @@ from direct.task import Task
 from direct.actor.Actor import Actor
 import sys
 import character
+import controller
 
 #The Main app class``
 class MyApp(ShowBase):
+    listtoupdate = []
 
     def __init__(self):
         #inits ShowBase
         ShowBase.__init__(self)
 
         #Inits character and character movement
-        self.character = character.Player(self)
-        self.character.handlemovement(self)
+        self.controller = controller.playercontroller(self)
+        self.npc1 = character.Player(self)
+        self.npc1.updateVelocity(1,2,2)
+        self.npc2 = character.Player(self)
+        self.npc2.updateVelocity(1,2,2)
+        self.npc2.pandaActor.setPos(10,0,0)
+        self.listtoupdate = [self.controller.player, self.npc1, self.npc2]
         #Loads the environment
         
         #Sets the camera position to Center
@@ -51,13 +58,14 @@ class MyApp(ShowBase):
         '''
         
         #Update Position
-        self.character.updatePosition()
-        print(str(self.character.position) + "                    ", end= "\r")
+        for acte in self.listtoupdate:
+            acte.updatePosition()
+        print(str(self.controller.player.position) + "                    ", end= "\r")
         #Camera offset
         offsetX = -30
         offsetY = 10
         #Sets camera Position
-        self.camera.setPos(self.character.position[0],self.character.position[1] + offsetX,self.character.position[2] + offsetY)
+        self.camera.setPos(self.controller.player.position[0],self.controller.player.position[1] + offsetX,self.controller.player.position[2] + offsetY)
         
         return task.cont
         

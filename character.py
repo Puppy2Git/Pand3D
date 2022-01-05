@@ -15,8 +15,8 @@ class Player():
         self.pandaActor.setScale(0.25, 0.25, 0.25)#Scale
         self.pandaActor.reparentTo(showbase.render)#ShowBase
         self.pandaActor.setPlayRate(1.50, "walk")
-        
-
+        self.sprint = False
+        self.velocity = [0,0,0]
         self.pandaActor.setHpr(0,0,0)
 
 
@@ -26,7 +26,11 @@ class Player():
         
         zcalc = 1
         if (directionX != 2):
-            self.deltaX = self.deltaX + directionX
+            if ((self.deltaX + directionX) >= 2 or (self.deltaX + directionX) <= -2):
+                self.deltaX = self.deltaX
+            else:
+                self.deltaX = self.deltaX + directionX
+                
             
         if (self.deltaX > 0):
             direction = direction + 180
@@ -36,10 +40,17 @@ class Player():
             zcalc = 1/2
         
         if (directionY != 2):
-            self.deltaY = self.deltaY + directionY
+            if ((self.deltaY + directionY) >= 2 or (self.deltaY + directionY) <= -2):
+                self.deltaY = self.deltaY
+            else:
+                self.deltaY = self.deltaY + directionY
         
         if (directionZ != 2):
-            self.deltaZ = self.deltaZ + directionZ
+            if ((self.deltaZ + directionZ) >= 2 or (self.deltaZ + directionZ) <= -2):
+                self.deltaZ = self.deltaZ
+            else:
+                self.deltaZ = self.deltaZ + directionZ
+
         if (self.deltaZ > 0):
             direction = direction + 90 * zcalc
         elif (self.deltaZ < 0):
@@ -49,16 +60,19 @@ class Player():
             if (not self.iswalking):
                 self.iswalking = True
                 self.pandaActor.loop("walk")
+                    
         else:
             if (self.iswalking):
                 self.iswalking = False
                 self.pandaActor.stop()
+        self.velocity = [self.deltaX,self.deltaY,self.deltaZ]
 
         
             
     def updatePosition(self,posX = None,posZ = None,posY = None):
         '''This updates the position based off of the given velocity or a given input'''
         speed = 0.25
+        speed = 0.50 if self.sprint == True else 0.25
         if (posX == None and posZ == None and posY == None):
             self.position = [self.position[0] + speed * self.deltaZ, self.position[1] + speed * self.deltaX ,self.position[2] + speed * self.deltaY]
         else:
@@ -66,29 +80,12 @@ class Player():
         #New position
         self.pandaActor.setPos(self.position[0],self.position[1],self.position[2])
 
-    def handlemovement(self,showbase):
-        #Does all of the showbase inputs just for cleanup
-        showbase.accept('arrow_up',self.updateVelocity,[1,2,2])
-        showbase.accept('arrow_up-up',self.updateVelocity,[-1,2,2])
-        
-        showbase.accept('arrow_down',self.updateVelocity,[-1,2,2])
-        showbase.accept('arrow_down-up',self.updateVelocity,[1,2,2])
-
-        showbase.accept('arrow_left',self.updateVelocity,[2,-1,2])
-        showbase.accept('arrow_left-up',self.updateVelocity,[2,1,2])
-        
-        showbase.accept('arrow_right',self.updateVelocity,[2,1,2])
-        showbase.accept('arrow_right-up',self.updateVelocity,[2,-1,2])
-
-        showbase.accept(']',self.updateVelocity,[2,2,1])
-        showbase.accept(']-up',self.updateVelocity,[2,2,-1])
-
-        showbase.accept('[',self.updateVelocity,[2,2,-1])
-        showbase.accept('[-up',self.updateVelocity,[2,2,1])
-
-        showbase.accept('escape',sys.exit)
-
-
+    def toggle_sprint(self, val):
+        if (val):
+            self.pandaActor.setPlayRate(2.25, "walk")
+        else:
+            self.pandaActor.setPlayRate(1.50, "walk")
+        self.sprint = val
 
     def spinactor(self, direction = 0):
         self.pandaActor.setHpr(direction, 0, 0)
