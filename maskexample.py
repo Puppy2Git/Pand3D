@@ -1,10 +1,24 @@
 from direct.showbase.ShowBase import ShowBase
 from direct.showbase.DirectObject import DirectObject
 from direct.gui.OnscreenText import OnscreenText, TextNode
+from direct.controls.PhysicsWalker import PhysicsWalker
+from direct.actor.Actor import Actor
 from panda3d.core import CollisionTraverser
 from panda3d.core import CollisionHandlerQueue, CollisionNode, BitMask32
 from panda3d.core import CollisionPlane, CollisionSphere, CollisionRay
 from panda3d.core import Plane, Vec3, Point3
+
+class dude(PhysicsWalker):
+    def __init__(self, gravity=-32.174, standableGround=0.707, hardLandingForce=16, base=None, coltrav=None, wall = None, floor = None):
+        super().__init__(gravity=gravity, standableGround=standableGround, hardLandingForce=hardLandingForce)
+        
+        
+        self.pandaActor = Actor("models/panda", {"walk":"models/panda-walk"})#Model and animations
+        self.pandaActor.setScale(0.25, 0.25, 0.25)#Scale
+        self.pandaActor.reparentTo(base.render)#ShowBase
+        self.pandaActor.setPlayRate(1.50, "walk")
+        self.initializeCollisions(collisionTraverser=coltrav,avatarNodePath=self.pandaActor,wallBitmask=wall,floorBitmask=floor)
+        self.enableAvatarControls()
 
 
 class World(DirectObject):
@@ -18,24 +32,24 @@ class World(DirectObject):
         # Define a few bitmasks for use.
         # Teaching the concepts of bitmasks is out of the scope of this sample.
         # This just shows a practical application of bitmasks.
-        goodMask = BitMask32(0x1)
-        badMask = BitMask32(0x2)
-        floorMask = BitMask32(0x4)
+        self.goodMask = BitMask32(0x1)
+        self.badMask = BitMask32(0x2)
+        self.floorMask = BitMask32(0x3)
 
         # Make a list of different combinations of the masks for later use.
         # We will switch between these masks later on.
         self.maskList = [
-            ["floor", floorMask],
-            ["smiley", goodMask],
-            ["frowney", badMask],
-            ["characters", goodMask | badMask],
-            ["smiley and floor", goodMask | floorMask],
-            ["frowney and floor", badMask | floorMask],
-            ["all", floorMask | goodMask | badMask]
+            ["floor", self.floorMask],
+            ["smiley", self.goodMask],
+            ["frowney", self.badMask],
+            ["characters", self.goodMask | self.badMask],
+            ["smiley and floor", self.goodMask | self.floorMask],
+            ["frowney and floor", self.badMask | self.floorMask],
+            ["all", self.floorMask | self.goodMask | self.badMask]
         ]
         # This keeps track of where we are in the dictionary.
         self.maskPos = 0
-
+        
         # First we create a floor collision plane.
         floorNode = base.render.attachNewNode("Floor NodePath")
         # Create a collision plane solid.
@@ -44,9 +58,9 @@ class World(DirectObject):
         # Call our function that creates a nodepath with a collision node.
         floorCollisionNP = self.makeCollisionNodePath(floorNode, collPlane)
         # Get the collision node the Nodepath is referring to.
-        floorCollisionNode = floorCollisionNP.node()
+        self.floorCollisionNode = floorCollisionNP.node()
         # The floor is only an into object, so just need to set its into mask.
-        floorCollisionNode.setIntoCollideMask(floorMask)
+        self.floorCollisionNode.setIntoCollideMask(self.floorMask)
 
         # Create a collision sphere. Since the models we'll be colliding
         # are basically the same we can get away with just creating one
@@ -61,7 +75,7 @@ class World(DirectObject):
         smileyCollisionNP = self.makeCollisionNodePath(smiley, collSphere)
         # Like with the floor plane we need to set the into mask.
         # Here we shortcut getting the actual collision node.
-        smileyCollisionNP.node().setIntoCollideMask(goodMask)
+        smileyCollisionNP.node().setIntoCollideMask(self.goodMask)
 
         # Make a frowney.
         frowney = base.loader.loadModel('frowney')
@@ -72,7 +86,7 @@ class World(DirectObject):
         # Use the the Nodepath.setCollideMask() function to set the into mask.
         # setCollideMask() sets the into mask of all child nodes to the given
         # mask.
-        frowneyCollisionNP.setCollideMask(badMask)
+        frowneyCollisionNP.setCollideMask(self.badMask)
         # Note that we don't call setCollideMask() from frowney because this
         # will turn the frowney mesh into a collision mesh which is unwanted.
 
@@ -141,11 +155,13 @@ class World(DirectObject):
 
 
 base = ShowBase()
+world = World()
 base.scene = base.loader.loadModel("models/environment")
 #Reparent the model to render.
 base.scene.reparentTo(base.render)
 #Apply Scale and position transforms on the model.
 base.scene.setScale(0.25,0.25,0.25)
-        
-world = World()
+
+
+base.newdude = dude(base=base, coltrav=base.cTrav, wall=world.goodMask,floor=world.floorMask)
 base.run()

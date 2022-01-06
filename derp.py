@@ -13,7 +13,7 @@ import controller
 class mychar(PhysicsWalker):
     def __init__(self,show, path):
         super().__init__(gravity= -32.174, standableGround=0.707, hardLandingForce=16.0)
-        self.initializeCollisions(collisionTraverser, path, wallBitmask, floorBitmask, avatarRadius=1.4, floorOffset=1.0, reach=1.0)
+        self.initializeCollisions(None, path, None, None, avatarRadius=1.4, floorOffset=1.0, reach=1.0)
         self.enableAvatarControls()
         position = [0,0,0]#Sets position
         self.pandaActor = Actor("models/panda", {"walk":"models/panda-walk"})#Model and animations
